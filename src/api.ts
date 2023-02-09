@@ -87,19 +87,15 @@ export class OpsLevelGraphqlAPI implements OpsLevelApi {
       entity.spec.type = "service";
     }
 
-    if (entity.metadata && entity.metadata.annotations) {
-      const sourceLocation = entity.metadata.annotations['backstage.io/source-location'];
-      if (sourceLocation) {
-        const sourceLocationParts = sourceLocation.split("/");
-        const input = {
-          entityRef: stringifyEntityRef(entity),
-          entity: entity,
-          entityAlias: entity.metadata.name,
-          repositoryAlias: `${sourceLocationParts[2]}:${sourceLocationParts[3]}/${sourceLocationParts[4]}`,
-        };
-        response =  this.client.request(importEntityFromBackstage, input);
-      }
-    }
+    const sourceLocation = entity.metadata.annotations?.['backstage.io/source-location'];
+    const sourceLocationParts = sourceLocation?.split("/");
+    const input = {
+      entityRef: stringifyEntityRef(entity),
+      entity: entity,
+      entityAlias: entity.metadata.name,
+      repositoryAlias: `${sourceLocationParts?.[2]}:${sourceLocationParts?.[3]}/${sourceLocationParts?.[4]}`,
+    };
+    response =  this.client.request(importEntityFromBackstage, input);
 
     return response
   }
