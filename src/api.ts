@@ -87,19 +87,15 @@ export class OpsLevelGraphqlAPI implements OpsLevelApi {
       entity.spec.type = "service";
     }
 
-    if (entity.metadata && entity.metadata.annotations) {
-      const sourceLocation = entity.metadata.annotations['backstage.io/source-location'];
-      if (sourceLocation) {
-        const sourceLocationParts = sourceLocation.split("/");
-        const input = {
-          entityRef: stringifyEntityRef(entity),
-          entity: entity,
-          entityAlias: entity.metadata.name,
-          repositoryAlias: `${sourceLocationParts[2]}:${sourceLocationParts[3]}/${sourceLocationParts[4]}`,
-        };
-        response =  this.client.request(importEntityFromBackstage, input);
-      }
-    }
+    const sourceLocation = entity.metadata.annotations?.['backstage.io/source-location'];
+    const sourceLocationParts = sourceLocation?.split("/");
+    const input = {
+      entityRef: stringifyEntityRef(entity),
+      entity: entity,
+      entityAlias: entity.metadata.name,
+      repositoryAlias: `${sourceLocationParts?.[2]}:${sourceLocationParts?.[3]}/${sourceLocationParts?.[4]}`,
+    };
+    response =  this.client.request(importEntityFromBackstage, input);
 
     return response
   }
@@ -126,7 +122,7 @@ export class OpsLevelGraphqlAPI implements OpsLevelApi {
     `;
 
     const serviceUpdate = `
-      mutation serviceUpdate($alias: String!, $language: String!, $tierAlias: String, $framework: String) {
+      mutation serviceUpdate($alias: String!, $language: String, $tierAlias: String, $framework: String) {
         serviceUpdate(input: {alias: $alias, language: $language, tierAlias: $tierAlias, framework: $framework}) {
           errors {
             message
@@ -157,7 +153,7 @@ export class OpsLevelGraphqlAPI implements OpsLevelApi {
       tierAlias = entity.metadata.annotations?.["opslevel.com/tier"]
 
       response = this.client.request(serviceUpdate, { alias: entityAlias,
-                                                      language: primaryLanguage.name,
+                                                      language: primaryLanguage?.name,
                                                       tierAlias: tierAlias,
                                                       framework: framework,
                                                       })
