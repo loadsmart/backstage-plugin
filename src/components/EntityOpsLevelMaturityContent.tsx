@@ -73,9 +73,9 @@ export const EntityOpsLevelMaturityContent = () => {
 
     showSnackbar({ message: "Updating service in OpsLevel...", severity: "info" });
 
-    const exportEntityResult = await opslevelApi.exportEntity(entity);
+    const result = await opslevelApi.exportEntity(entity);
 
-    showSnackbar({ message: exportEntityResult?.import.actionMessage, severity: "success", duration: 5000 });
+    showSnackbar({ message: result?.import.actionMessage, severity: "success", duration: 5000 });
 
     await opslevelApi.updateService(entity)
 
