@@ -58,6 +58,9 @@ export function ExportEntitiesForm() {
 
       await opslevelApi.updateService(entity)
 
+      // wait 300ms to avoid opslevel api throttling
+      await new Promise(resolve => setTimeout(resolve, 300));
+
       localOutput += `${finishExportMessage(result)}\n`;
       setOutput(localOutput);
     }
