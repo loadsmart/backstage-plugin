@@ -61,21 +61,13 @@ export class OpsLevelGraphqlAPI implements OpsLevelApi {
   exportEntity(entity: Entity) {
 
     const importEntityFromBackstage = `
-    mutation importAndCreate($entityRef: String!, $entity: JSON!, $entityAlias: String!, $repositoryAlias: String!) {
+    mutation import($entityRef: String!, $entity: JSON!) {
       import: importEntityFromBackstage(entityRef: $entityRef, entity: $entity) {
         errors {
           message
         }
         actionMessage
         htmlUrl
-      }
-      create: serviceRepositoryCreate(input: {service: {alias: $entityAlias}, repository: {alias: $repositoryAlias}}) {
-        serviceRepository {
-          id
-        }
-        errors {
-          message
-        }
       }
     }
     `;
@@ -87,13 +79,10 @@ export class OpsLevelGraphqlAPI implements OpsLevelApi {
       entity.spec.type = "service";
     }
 
-    const sourceLocation = entity.metadata.annotations?.['backstage.io/source-location'];
-    const sourceLocationParts = sourceLocation?.split("/");
     const input = {
       entityRef: stringifyEntityRef(entity),
       entity: entity,
       entityAlias: entity.metadata.name,
-      repositoryAlias: `${sourceLocationParts?.[2]}:${sourceLocationParts?.[3]}/${sourceLocationParts?.[4]}`,
     };
     response =  this.client.request(importEntityFromBackstage, input);
 
@@ -122,8 +111,8 @@ export class OpsLevelGraphqlAPI implements OpsLevelApi {
     `;
 
     const serviceUpdate = `
-      mutation serviceUpdate($alias: String!, $language: String, $tierAlias: String, $framework: String) {
-        serviceUpdate(input: {alias: $alias, language: $language, tierAlias: $tierAlias, framework: $framework}) {
+      mutation serviceUpdate($alias: String!, $language: String, $framework: String) {
+        serviceUpdate(input: {alias: $alias, language: $language, framework: $framework}) {
           errors {
             message
           }
@@ -134,7 +123,6 @@ export class OpsLevelGraphqlAPI implements OpsLevelApi {
     const entityAlias = entity.metadata.name
 
     let response = Promise.resolve(null)
-    let tierAlias: string | undefined;
     let framework: string | undefined;
 
     this.client.request(getServiceLanguage, { alias: entityAlias }).then((result) => {
@@ -150,11 +138,8 @@ export class OpsLevelGraphqlAPI implements OpsLevelApi {
         framework = entity.metadata.tags?.find(tag => this.frameworks.includes(tag));
       }
 
-      tierAlias = entity.metadata.annotations?.["opslevel.com/tier"]
-
       response = this.client.request(serviceUpdate, { alias: entityAlias,
                                                       language: primaryLanguage?.name,
-                                                      tierAlias: tierAlias,
                                                       framework: framework,
                                                       })
     });
