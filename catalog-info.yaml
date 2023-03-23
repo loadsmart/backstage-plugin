@@ -5,6 +5,7 @@ metadata:
   description: OpsLevel's Service Maturity plugin for Backstage
   annotations:
     github.com/project-slug: loadsmart/opslevel-backstage-plugin
+    opslevel.com/tier: tier_4
   tags:
     - typescript
 spec:
