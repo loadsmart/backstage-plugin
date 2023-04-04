@@ -1,5 +1,6 @@
 export {
   opslevelMaturityPlugin,
   OpslevelMaturityPage,
-  EntityOpsLevelMaturityContent
+  EntityOpsLevelMaturityContent,
+  OpsLevelGraphqlAPI
 } from './plugin';

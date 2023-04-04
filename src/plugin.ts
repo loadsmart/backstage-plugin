@@ -8,6 +8,8 @@ import { opslevelApiRef, OpsLevelGraphqlAPI } from './api';
 
 import { rootRouteRef } from './routes';
 
+export { OpsLevelGraphqlAPI };
+
 export const opslevelMaturityPlugin = createPlugin({
   id: 'opslevel-maturity',
   routes: {
