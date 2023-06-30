@@ -9,26 +9,26 @@ import { opslevelApiRef } from '../api';
 import { useApi } from '@backstage/core-plugin-api';
 import { useEntity } from '@backstage/plugin-catalog-react';
 import { useAsync, useAsyncFn } from 'react-use';
-import { OpsLevelData } from '../types/OpsLevelData';
+import { OpsLevelServiceData } from '../types/OpsLevelData';
 import { SnackAlert, SnackbarProps } from './SnackAlert';
+import { CheckResultsByLevel } from './CheckResultsByLevel';
+import Scorecard from './Scorecard';
 
 export const EntityOpsLevelMaturityContent = () => {
-
-
   const { entity } = useEntity();
   const opslevelApi = useApi(opslevelApiRef);
   const serviceAlias = stringifyEntityRef(entity);
 
-  const [opsLevelData, setOpsLevelData] = useState<OpsLevelData>();
+  const [opsLevelData, setOpsLevelData] = useState<OpsLevelServiceData>();
   const [exporting, setExporting] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbar, setSnackbar] = useState<SnackbarProps>({ message: "", severity: "info" });
   const [fetchState, doFetch] = useAsyncFn(async () => {
-      const result = await opslevelApi.getServiceMaturityByAlias(serviceAlias)
+    const result = await opslevelApi.getServiceMaturityByAlias(serviceAlias)
 
-      if (result) {
-        setOpsLevelData(result);
-      }
+    if (result) {
+      setOpsLevelData(result);
+    }
   });
   useAsync(doFetch, [serviceAlias])
 
@@ -61,6 +61,9 @@ export const EntityOpsLevelMaturityContent = () => {
 
   const { maturityReport } = service;
   const levels = opsLevelData.account?.rubric?.levels?.nodes;
+  const levelCategories = opsLevelData.account?.service?.maturityReport?.categoryBreakdown;
+  const checkResultsByLevel = opsLevelData.account?.service?.serviceStats?.rubric?.checkResults?.byLevel?.nodes;
+  const checkStats = opsLevelData.account?.service?.checkStats;
 
   if (!maturityReport) {
     return (<ServiceMaturityError error={"We don't have any maturity details for this service yet,"
@@ -95,22 +98,22 @@ export const EntityOpsLevelMaturityContent = () => {
       <Grid item>{error}</Grid>
       <Grid item>
         { showExport ?
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={exportEntity}
-          disabled={exporting}
-        >
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={exportEntity}
+            disabled={exporting}
+          >
           Export Entity to OpsLevel
-        </Button> :
-        <Button
-          variant="contained"
-          color="primary"
-          target="_blank"
-          href={`${service?.htmlUrl}/maturity-report`}
-        >
+          </Button> :
+          <Button
+            variant="contained"
+            color="primary"
+            target="_blank"
+            href={`${service?.htmlUrl}/maturity-report`}
+          >
           View Maturity in OpsLevel
-        </Button>
+          </Button>
         }
       </Grid>
     </Grid>
@@ -119,7 +122,7 @@ export const EntityOpsLevelMaturityContent = () => {
 
   function ServiceMaturityReport () {
     return (<>
-      <Grid container item justifyContent="flex-end" spacing={2}>
+      <Grid container item xs={12} justifyContent="flex-end">
         <Grid item>
           <Button
             variant="contained"
@@ -141,12 +144,29 @@ export const EntityOpsLevelMaturityContent = () => {
           </Button>
         </Grid>
       </Grid>
-      <Grid container item spacing={2}>
-        <Grid item xs={3}>
-          <OverallLevel maturityReport={maturityReport} />
+      <Grid container item>
+        <Grid container item xs={4} direction="column">
+          <Grid item>
+            <OverallLevel maturityReport={maturityReport} />
+          </Grid>
+          <Grid item>
+            <Scorecard levels={levels} levelCategories={levelCategories}/>
+          </Grid>
         </Grid>
-        <Grid item xs={9}>
-          <EntityOpsLevelMaturityProgress levels={levels} serviceLevel={maturityReport?.overallLevel}/>
+        <Grid container item xs={8} direction="column">
+          <Grid item>
+            <EntityOpsLevelMaturityProgress
+              levels={levels}
+              serviceLevel={maturityReport?.overallLevel}
+            />
+          </Grid>
+          <Grid item>
+            <CheckResultsByLevel
+              checkResultsByLevel={checkResultsByLevel}
+              totalChecks={checkStats.totalChecks}
+              totalPassingChecks={checkStats.totalPassingChecks}
+            />
+          </Grid>
         </Grid>
       </Grid>
     </>);
