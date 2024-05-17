@@ -125,7 +125,7 @@ export class OpsLevelGraphqlAPI implements OpsLevelApi {
     let response = Promise.resolve(null)
     let framework: string | undefined;
 
-    this.client.request(getServiceLanguage, { alias: entityAlias }).then((result) => {
+    this.client.request(getServiceLanguage, { alias: entityAlias }).then((result: any) => {
 
       const repos = result.account.service.repos.edges[0].node;
       const languages: {name: string, usage: number}[] = repos.languages;
