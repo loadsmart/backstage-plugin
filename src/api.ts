@@ -79,6 +79,10 @@ export class OpsLevelGraphqlAPI implements OpsLevelApi {
       entity.spec.type = "service";
     }
 
+    if (entity.spec?.definition) {
+      delete entity.spec?.definition;
+    }
+
     const input = {
       entityRef: stringifyEntityRef(entity),
       entity: entity,
